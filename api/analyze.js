@@ -1,22 +1,38 @@
-const { analyzeProduct } = require("../server/analyzeProduct");
+import Groq from "groq-sdk";
 
-module.exports = async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).end();
+  }
 
   const { productName } = req.body;
 
-  if (!productName || typeof productName !== "string" || productName.trim() === "") {
+  if (!productName || typeof productName !== "string") {
     return res.status(400).json({ error: "Product name is required." });
   }
 
   try {
-    const result = await analyzeProduct(productName.trim());
-    res.json(result);
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content: "Return ONLY valid JSON.",
+        },
+        {
+          role: "user",
+          content: `Analyze "${productName}" and return JSON`,
+        },
+      ],
+    });
+
+    const text = completion.choices[0].message.content;
+    const clean = text.replace(/```json|```/g, "").trim();
+
+    res.status(200).json(JSON.parse(clean));
   } catch (err) {
-    if (err.status === 429) {
-      res.status(429).json({ error: "Rate limit reached. Please wait and try again." });
-    } else {
-      res.status(500).json({ error: "Analysis failed. Please try again." });
-    }
+    res.status(500).json({ error: "Analysis failed" });
   }
-};
+}
