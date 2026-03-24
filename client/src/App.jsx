@@ -14,7 +14,7 @@ export default function App() {
     setReport(null);
 
     try {
-      const response = await axios.post("/api/analyze", {
+      const response = await axios.post("http://localhost:3001/api/analyze", {
         productName,
       });
       setReport(response.data);
