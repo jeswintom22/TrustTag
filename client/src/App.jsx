@@ -48,7 +48,7 @@ export default function App() {
 
       {/* Hero / Search Section */}
       <section className="max-w-5xl mx-auto px-4 pt-12 pb-8 text-center">
-        <p className="text-teal-400 text-xs font-semibold uppercase tracking-widest mb-3">Powered by Claude AI + Live Web Search</p>
+        <p className="text-teal-400 text-xs font-semibold uppercase tracking-widest mb-3">Powered by Groq AI + Live Web Search</p>
         <h2 className="text-3xl sm:text-5xl font-black text-white mb-3 leading-tight">
           Is Your Product <span className="text-teal-400">Actually Safe?</span>
         </h2>
