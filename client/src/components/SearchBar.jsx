@@ -19,6 +19,7 @@ export default function SearchBar({ onSearch, loading }) {
       <div className="flex flex-col sm:flex-row gap-3">
         <input
           type="text"
+          maxLength={200}
           value={value}
           onChange={(e) => {
             setValue(e.target.value);

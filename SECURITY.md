@@ -25,11 +25,12 @@ We will work to patch confirmed vulnerabilities promptly and credit you in the r
 - Never commit a real `GROQ_API_KEY` or any other secret to the repository.
 
 ### Input Validation
-- The `/api/analyze` endpoint validates that `productName` is a non-empty string before forwarding to the AI model.
+- The `/api/analyze` endpoint validates that `productName` is a non-empty string of at most 200 characters before forwarding to the AI model.
 - Express `express.json()` middleware limits the request body to prevent oversized payloads.
 
 ### CORS
-- CORS is enabled globally for development. For production deployment, restrict the `origin` option in `cors()` to your frontend domain only:
+- The Vercel function `api/analyze.js` only allows its own deployment origin plus any origins listed in `ALLOWED_ORIGINS`; requests from other origins get a 403.
+- The local Express server enables CORS globally for development. For production deployment, restrict the `origin` option in `cors()` to your frontend domain only:
   ```js
   app.use(cors({ origin: "https://your-frontend-domain.com" }));
   ```
@@ -39,6 +40,8 @@ We will work to patch confirmed vulnerabilities promptly and credit you in the r
 - AI-generated safety reports are informational only and do not constitute medical or legal advice.
 
 ### Rate Limiting
+- `api/analyze.js` enforces a per-IP limit (`RATE_LIMIT_MAX` requests per `RATE_LIMIT_WINDOW_SECONDS`, default 10/60s) and returns 429 before calling Groq. Set `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` (or Vercel KV's `KV_REST_API_URL`/`KV_REST_API_TOKEN`) so the limit is shared across serverless instances; otherwise it is enforced per instance only.
+- Set a spending cap / usage limit on the Groq API key as a final backstop.
 - The server returns 429 errors when the upstream Groq API rate limit is reached. For production use, consider adding `express-rate-limit` to the Express server to prevent abuse.
 
 ### Dependency Security
